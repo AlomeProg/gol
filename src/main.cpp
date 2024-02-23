@@ -4,8 +4,8 @@
 #include <random>
 #include <chrono>
 
-const unsigned int size_map = 16;
-const unsigned int size_cell = 16;
+const unsigned int size_map = 64;
+const unsigned int size_cell = 8;
 
 using Map = std::array<std::array<bool, size_map>, size_map>;
 
@@ -24,10 +24,15 @@ void InitMap()
   {
     for(std::size_t x = 0; x < size_map; x++)
     {
-      mapA.at(y).at(x) = (dist(gen) == 1) ? true : false;
+      // mapA.at(y).at(x) = (dist(gen) == 1) ? true : false;
+      mapA.at(y).at(x) = false;
       mapB.at(y).at(x) = false;
     }
   }
+
+  mapA.at(1).at(1) = true;
+  mapA.at(2).at(1) = true;
+  mapA.at(3).at(2) = true;
 
   current_map   = &mapA;
   next_map  = &mapB;
@@ -78,14 +83,17 @@ void TickMap()
     {
       int neighbors = CheckNeighbors(x, y);
 
-      if (neighbors == 3 && current_map->at(y).at(x) == false)
-        next_map->at(y).at(x) = true;
+      if (current_map->at(y).at(x) == false)
+        if (neighbors == 3)
+          next_map->at(y).at(x) = true;
+      else 
+      {
+        if (neighbors == 2 || neighbors == 3) 
+          next_map->at(y).at(x) = true;
 
-      if (neighbors == 2 || neighbors == 3) 
-        next_map->at(y).at(x) = true;
-
-      if (neighbors < 2 || neighbors > 3)
-        next_map->at(y).at(x) = false;
+        if (neighbors < 2 || neighbors > 3)
+          next_map->at(y).at(x) = false;
+      }
     }
   }
   std::swap(current_map, next_map);
@@ -96,7 +104,15 @@ int main()
   InitWindow(800, 600, "gol");
   InitMap();
   
+  int size_texture = size_map * size_cell;
+  for (int i = 0; i < size_map; i++) size_texture += i;
+  RenderTexture2D texture = LoadRenderTexture(size_texture, size_texture);
+  
   auto last_time = std::chrono::steady_clock::now();
+
+  BeginTextureMode(texture);
+  DrawMap();
+  EndTextureMode();
 
   while (!WindowShouldClose())
   {
@@ -106,11 +122,21 @@ int main()
     {
       TickMap();
       last_time = cur_time;
+      BeginTextureMode(texture);
+      DrawMap();
+      EndTextureMode();
     }
+
+    const Rectangle source_rec = 
+    {
+      .x = 0, .y = 0,
+      .width = static_cast<float>(size_texture),
+      .height = static_cast<float>(-size_texture),
+    };
 
     BeginDrawing();
     ClearBackground(BLACK);
-    DrawMap();
+    DrawTextureRec(texture.texture, source_rec, {0,0}, WHITE);
     DrawFPS(0, 0);
     EndDrawing();
   }
