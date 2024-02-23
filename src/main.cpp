@@ -30,12 +30,14 @@ void InitMap()
     }
   }
 
-  mapA.at(1).at(1) = true;
-  mapA.at(2).at(1) = true;
-  mapA.at(3).at(2) = true;
+  mapA.at(1 + 10).at(1 + 10) = true;
+  mapA.at(2 + 10).at(2 + 10) = true;
+  mapA.at(3 + 10).at(3 + 10) = true;
+  mapA.at(2 + 10).at(4 + 10) = true;
+  mapA.at(1 + 10).at(5 + 10) = true;
 
   current_map   = &mapA;
-  next_map  = &mapB;
+  next_map      = &mapB;
 }
 
 void DrawMap()
@@ -84,14 +86,17 @@ void TickMap()
       int neighbors = CheckNeighbors(x, y);
 
       if (current_map->at(y).at(x) == false)
+      {
         if (neighbors == 3)
           next_map->at(y).at(x) = true;
+        else 
+          next_map->at(y).at(x) = false;
+      }
       else 
       {
-        if (neighbors == 2 || neighbors == 3) 
+        if (neighbors == 2 || neighbors == 3)
           next_map->at(y).at(x) = true;
-
-        if (neighbors < 2 || neighbors > 3)
+        else
           next_map->at(y).at(x) = false;
       }
     }
