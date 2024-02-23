@@ -2,6 +2,7 @@
 #include <array>
 #include <iostream>
 #include <random>
+#include <chrono>
 
 const unsigned int size_map = 16;
 const unsigned int size_cell = 16;
@@ -94,9 +95,18 @@ int main()
 {
   InitWindow(800, 600, "gol");
   InitMap();
+  
+  auto last_time = std::chrono::steady_clock::now();
+
   while (!WindowShouldClose())
   {
-    TickMap();
+    auto cur_time = std::chrono::steady_clock::now();
+    auto ela_time = std::chrono::duration_cast<std::chrono::seconds>(cur_time - last_time).count();
+    if (ela_time >= 1)
+    {
+      TickMap();
+      last_time = cur_time;
+    }
 
     BeginDrawing();
     ClearBackground(BLACK);
