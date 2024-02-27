@@ -111,8 +111,6 @@ void MultiTickMap(std::vector<std::thread>& threads)
   const std::size_t num_threads = threads.size();
   const std::size_t rows_per_thread = size_map / num_threads;
   
-  // std::vector<std::thread> threads; 
-  
   for(size_t i = 0; i < num_threads; i++)
   {
     std::size_t start_y = i * rows_per_thread;
@@ -143,7 +141,7 @@ int main()
   InitMap();
   
   int size_texture = size_map * size_cell;
-  for (int i = 0; i < size_map; i++) size_texture += i;
+  size_texture += size_map * (size_map + 1) / 2;
   RenderTexture2D texture = LoadRenderTexture(size_texture, size_texture);
   
   auto last_time = std::chrono::steady_clock::now();
