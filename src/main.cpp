@@ -3,6 +3,8 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <thread>
+#include <mutex>
 
 const unsigned int size_map = 128;
 const unsigned int size_cell = 8;
@@ -13,6 +15,8 @@ Map mapA;
 Map mapB;
 Map *current_map;
 Map *next_map;
+
+std::mutex mutex_map;
 
 void InitMap()
 {
@@ -97,6 +101,39 @@ void TickMap()
   std::swap(current_map, next_map);
 }
 
+void TickOneThread(std::size_t start_y, std::size_t end_y) {
+  for (std::size_t y = start_y; y < end_y; ++y) {
+    for (std::size_t x = 0; x < size_map; ++x) {
+      int neighbors = CheckNeighbors(x, y);
+
+      bool is_alive = current_map->at(y).at(x);
+      bool will_live = is_alive ? (neighbors == 2 || neighbors == 3) : (neighbors == 3);
+
+      // Блокируем мьютекс перед изменением следующей карты
+      std::lock_guard<std::mutex> lock(mutex_map);
+      next_map->at(y).at(x) = will_live;
+    }
+  }
+}
+
+void MultiTickMap(std::vector<std::thread>& threads)
+{
+  const std::size_t num_threads = threads.size();
+  const std::size_t rows_per_thread = size_map / num_threads;
+  
+  // std::vector<std::thread> threads; 
+  
+  for(size_t i = 0; i < num_threads; i++)
+  {
+    std::size_t start_y = i * rows_per_thread;
+    std::size_t end_y   = (i == num_threads - 1) ? size_map : (start_y + rows_per_thread);
+    threads[i] = std::thread(TickOneThread, start_y, end_y);
+  }
+
+  for(auto& thread : threads) thread.join();
+  std::swap(current_map, next_map);
+}
+
 void UpdateCamera(Camera2D& camera)
 {
   static float delta, speed;
@@ -133,15 +170,17 @@ int main()
     .zoom = 1.0f,
   };
 
+  const std::size_t num_threads = std::thread::hardware_concurrency();
+  std::vector<std::thread> threads(num_threads);
+
   while (!WindowShouldClose())
   {
-    
-
     auto cur_time = std::chrono::steady_clock::now();
     auto ela_time = std::chrono::duration_cast<std::chrono::milliseconds>(cur_time - last_time).count();
     if (ela_time >= 100)
     {
-      TickMap();
+      // TickMap();
+      MultiTickMap(threads);
       last_time = cur_time;
       BeginTextureMode(texture);
       DrawMap();
