@@ -112,6 +112,14 @@ int main()
   DrawMap();
   EndTextureMode();
 
+  Camera2D camera = 
+  {
+    .offset = {400.0f, 300.0f},
+    .target = {0.0f, 0.0f},
+    .rotation = 0.0f,
+    .zoom = 1.0f,
+  };
+
   while (!WindowShouldClose())
   {
     auto cur_time = std::chrono::steady_clock::now();
@@ -133,9 +141,15 @@ int main()
     };
 
     BeginDrawing();
-    ClearBackground(BLACK);
-    DrawTextureRec(texture.texture, source_rec, {0,0}, WHITE);
-    DrawFPS(0, 0);
+    {
+      BeginMode2D(camera);
+      {
+        ClearBackground(BLACK);
+        DrawTextureRec(texture.texture, source_rec, {0,0}, WHITE);
+      }
+      EndMode2D();
+      DrawFPS(0, 0);
+    }
     EndDrawing();
   }
   CloseWindow();
