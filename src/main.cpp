@@ -4,7 +4,7 @@
 #include <random>
 #include <chrono>
 
-const unsigned int size_map = 64;
+const unsigned int size_map = 128;
 const unsigned int size_cell = 8;
 
 using Map = std::array<std::array<bool, size_map>, size_map>;
@@ -24,17 +24,10 @@ void InitMap()
   {
     for(std::size_t x = 0; x < size_map; x++)
     {
-      // mapA.at(y).at(x) = (dist(gen) == 1) ? true : false;
-      mapA.at(y).at(x) = false;
+      mapA.at(y).at(x) = (dist(gen) == 1) ? true : false;
       mapB.at(y).at(x) = false;
     }
   }
-
-  mapA.at(1 + 10).at(1 + 10) = true;
-  mapA.at(2 + 10).at(2 + 10) = true;
-  mapA.at(3 + 10).at(3 + 10) = true;
-  mapA.at(2 + 10).at(4 + 10) = true;
-  mapA.at(1 + 10).at(5 + 10) = true;
 
   current_map   = &mapA;
   next_map      = &mapB;
@@ -122,8 +115,8 @@ int main()
   while (!WindowShouldClose())
   {
     auto cur_time = std::chrono::steady_clock::now();
-    auto ela_time = std::chrono::duration_cast<std::chrono::seconds>(cur_time - last_time).count();
-    if (ela_time >= 1)
+    auto ela_time = std::chrono::duration_cast<std::chrono::milliseconds>(cur_time - last_time).count();
+    if (ela_time >= 100)
     {
       TickMap();
       last_time = cur_time;
