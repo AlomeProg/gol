@@ -82,20 +82,10 @@ void TickMap()
     {
       int neighbors = CheckNeighbors(x, y);
 
-      if (current_map->at(y).at(x) == false)
-      {
-        if (neighbors == 3)
-          next_map->at(y).at(x) = true;
-        else 
-          next_map->at(y).at(x) = false;
-      }
-      else 
-      {
-        if (neighbors == 2 || neighbors == 3)
-          next_map->at(y).at(x) = true;
-        else
-          next_map->at(y).at(x) = false;
-      }
+      bool is_alive = current_map->at(y).at(x);
+      bool will_live = is_alive ? (neighbors == 2 || neighbors == 3) : (neighbors == 3);
+
+      next_map->at(y).at(x) = will_live;
     }
   }
   std::swap(current_map, next_map);
@@ -164,10 +154,10 @@ int main()
 
   Camera2D camera = 
   {
-    .offset = {400.0f, 300.0f},
-    .target = {0.0f, 0.0f},
+    .offset   = {400.0f, 300.0f},
+    .target   = {0.0f, 0.0f},
     .rotation = 0.0f,
-    .zoom = 1.0f,
+    .zoom     = 1.0f,
   };
 
   const std::size_t num_threads = std::thread::hardware_concurrency();
