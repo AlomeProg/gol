@@ -97,6 +97,19 @@ void TickMap()
   std::swap(current_map, next_map);
 }
 
+void UpdateCamera(Camera2D& camera)
+{
+  static float delta, speed;
+  delta = GetFrameTime();
+  speed = 256;
+
+  if (IsKeyDown(KEY_LEFT_SHIFT)) speed  *= 2;
+  if (IsKeyDown(KEY_W)) camera.target.y -= speed * delta;
+  if (IsKeyDown(KEY_A)) camera.target.x -= speed * delta;
+  if (IsKeyDown(KEY_S)) camera.target.y += speed * delta;
+  if (IsKeyDown(KEY_D)) camera.target.x += speed * delta;
+}
+
 int main()
 {
   InitWindow(800, 600, "gol");
@@ -122,6 +135,8 @@ int main()
 
   while (!WindowShouldClose())
   {
+    
+
     auto cur_time = std::chrono::steady_clock::now();
     auto ela_time = std::chrono::duration_cast<std::chrono::milliseconds>(cur_time - last_time).count();
     if (ela_time >= 100)
@@ -132,6 +147,8 @@ int main()
       DrawMap();
       EndTextureMode();
     }
+    
+    UpdateCamera(camera);
 
     const Rectangle source_rec = 
     {
